@@ -1,0 +1,962 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<title>Market Insights Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #030a16;
+    color: #eef5ff;
+    font-family: Inter, Arial, sans-serif;
+}
+
+.wrap {
+    min-height: 100vh;
+    padding: 18px;
+    background:
+        radial-gradient(circle at 82% 0%, #24204e 0, transparent 32%),
+        linear-gradient(135deg, #061425, #030a16 65%);
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: 245px 1fr;
+    gap: 15px;
+    max-width: 1500px;
+    margin: auto;
+}
+
+/* SIDEBAR */
+
+.sidebar {
+    background: linear-gradient(180deg, #071225, #040a15);
+    border: 1px solid #17243b;
+    border-radius: 22px;
+    padding: 20px 16px;
+    min-height: 960px;
+}
+
+.brand {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin: 4px 10px 35px;
+}
+
+.logo {
+    font-size: 42px;
+    filter: drop-shadow(0 0 10px #19cfff);
+}
+
+.brand h2 {
+    font: 700 24px 'Space Grotesk';
+    line-height: 1;
+    margin: 0;
+}
+
+.brand h2 span {
+    color: #8959ff;
+}
+
+.brand small {
+    display: block;
+    color: #dbe5f5;
+    font-size: 10px;
+    margin-top: 8px;
+    white-space: nowrap;
+}
+
+.nav {
+    padding: 14px 15px;
+    margin: 9px 0;
+    border-radius: 10px;
+    color: #d7dfed;
+    font-size: 15px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.nav:hover {
+    background: #182544;
+    transform: translateX(4px);
+}
+
+.nav.active {
+    background: linear-gradient(90deg, #5142ee, #6250e8);
+    box-shadow: 0 0 22px #5142ee66;
+}
+
+.ad {
+    margin-top: 270px;
+    border: 1px solid #944fff;
+    border-radius: 17px;
+    padding: 20px 18px;
+    height: 325px;
+    background:
+        radial-gradient(circle at 50% 100%, #401b8c88, transparent 48%),
+        #10122e;
+}
+
+.ad h3 {
+    font-size: 17px;
+    margin: 25px 0 10px;
+}
+
+.ad b {
+    color: #35f29b;
+    font-size: 18px;
+}
+
+.ad p {
+    line-height: 1.8;
+}
+
+.car {
+    font-size: 62px;
+    text-align: center;
+    margin-top: 35px;
+    filter: drop-shadow(0 0 15px #a442ff);
+}
+
+/* MAIN */
+
+.main {
+    min-width: 0;
+}
+
+.hero {
+    min-height: 108px;
+    border: 1px solid #1b2b45;
+    border-radius: 18px;
+    padding: 20px 26px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(110deg, #10223b, #0b172b);
+}
+
+.hero h1 {
+    font: 700 25px 'Space Grotesk';
+    margin: 0 0 8px;
+}
+
+.hero p {
+    margin: 0;
+    color: #c4cede;
+    font-size: 14px;
+}
+
+.select-title {
+    font-size: 11px;
+    color: #aebbd0;
+    margin-bottom: 8px;
+}
+
+.company {
+    display: flex;
+    gap: 18px;
+}
+
+.company button {
+    height: 61px;
+    width: 230px;
+    border-radius: 12px;
+    border: 1px solid #202e49;
+    background: #091426;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.company button:hover {
+    transform: translateY(-3px);
+}
+
+.company button.active {
+    background: linear-gradient(110deg, #ed173e, #c70c2c);
+    border-color: #ff4765;
+    box-shadow: 0 0 18px #e9153d55;
+}
+
+/* FILTERS */
+
+.controls {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+}
+
+label {
+    display: block;
+    color: #8192ab;
+    font-size: 11px;
+    margin-bottom: 7px;
+}
+
+select {
+    width: 100%;
+    background: #0a182b;
+    border: 1px solid #233650;
+    color: #b8c4d6;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+/* CARDS */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+}
+
+.card {
+    height: 160px;
+    border-radius: 15px;
+    padding: 20px;
+    background: #09182a;
+    border: 1px solid #273650;
+    position: relative;
+    overflow: hidden;
+    transition: .35s;
+}
+
+.card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px #00000055;
+}
+
+.card:after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    background: var(--c);
+}
+
+.card.red {
+    --c: #ff3b58;
+    border-color: #ff3b58;
+    box-shadow: 0 0 18px #ff3b5830;
+}
+
+.card.green {
+    --c: #20df86;
+    border-color: #20df86;
+    box-shadow: 0 0 18px #20df8630;
+}
+
+.card.purple {
+    --c: #934cff;
+    border-color: #934cff;
+    box-shadow: 0 0 18px #934cff30;
+}
+
+.card.blue {
+    --c: #19aaff;
+    border-color: #19aaff;
+    box-shadow: 0 0 18px #19aaff30;
+}
+
+.card .label {
+    font-size: 12px;
+    color: #d6deea;
+}
+
+.value {
+    font: 700 29px 'Space Grotesk';
+    margin: 14px 0 7px;
+}
+
+.note {
+    font-size: 12px;
+    color: #a8b4c6;
+}
+
+.bigicon {
+    position: absolute;
+    right: 20px;
+    top: 26px;
+    font-size: 42px;
+    opacity: .75;
+}
+
+/* CHARTS */
+
+.grid {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.panel {
+    background: #071426;
+    border: 1px solid #1b2c45;
+    border-radius: 15px;
+    padding: 17px;
+    min-width: 0;
+}
+
+.panel h3 {
+    font: 600 16px 'Space Grotesk';
+    margin: 0 0 13px;
+}
+
+.chart {
+    height: 335px;
+}
+
+/* LOWER PANELS */
+
+.lower {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+}
+
+.stat {
+    padding: 10px 12px;
+    border-right: 1px solid #26364e;
+}
+
+.stat:last-child {
+    border: 0;
+}
+
+.stat small {
+    color: #b4bfd0;
+    font-size: 11px;
+}
+
+.stat strong {
+    display: block;
+    font-size: 21px;
+    margin-top: 16px;
+}
+
+.cyan {
+    color: #16bfff;
+}
+
+.pink {
+    color: #ff3c63;
+}
+
+.violet {
+    color: #a96bff;
+}
+
+.green {
+    color: #29e990;
+}
+
+.gold {
+    color: #ffc857;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    text-align: center;
+    gap: 8px;
+}
+
+.circle {
+    font-size: 30px;
+    margin: 8px auto;
+    border: 2px solid;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    padding-top: 12px;
+}
+
+.summary small {
+    color: #b9c4d4;
+}
+
+.summary strong {
+    display: block;
+    margin-top: 7px;
+    font-size: 16px;
+}
+
+.footer {
+    margin-top: 14px;
+    border: 1px solid #27355b;
+    background: #111b3a;
+    border-radius: 12px;
+    padding: 13px 20px;
+    color: #b6c1d2;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1000px) {
+
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .cards,
+    .controls {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid,
+    .lower {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="dashboard">
+
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="brand">
+        <div class="logo">🚘</div>
+
+        <div>
+            <h2>
+                MARKET<br>
+                <span>INSIGHTS</span>
+            </h2>
+
+            <small>Stock & Revenue Dashboard</small>
+        </div>
+    </div>
+
+    <div class="nav active">⌂　Overview</div>
+    <div class="nav">⌁　Stock Price</div>
+    <div class="nav">＄　Revenue</div>
+    <div class="nav">▥　Statistics</div>
+    <div class="nav">ⓘ　About</div>
+
+    <div class="ad">
+        <h3>DRIVE YOUR</h3>
+        <b>INVESTMENTS</b>
+
+        <p>
+            Data. Insights.<br>
+            Better Decisions.
+        </p>
+
+        <div class="car">🏎️</div>
+    </div>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+<section class="hero">
+
+    <div>
+        <h1>Welcome back! 👋</h1>
+
+        <p>
+            Track performance, analyze trends and make
+            smarter investment decisions.
+        </p>
+    </div>
+
+    <div>
+
+        <div class="select-title">
+            SELECT COMPANY
+        </div>
+
+        <div class="company">
+
+            <button class="active"
+                    onclick="choose('Tesla', this)">
+                🚘　TESLA
+            </button>
+
+            <button onclick="choose('GameStop', this)">
+                🎮　GAMESTOP
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- FILTERS -->
+
+<div class="controls">
+
+    <div>
+        <label>Company</label>
+
+        <select id="company" onchange="changeCompany(this.value)">
+            <option>Tesla</option>
+            <option>GameStop</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Time range</label>
+
+        <select>
+            <option>1Y</option>
+            <option>3Y</option>
+            <option>5Y</option>
+            <option>10Y</option>
+            <option>Max</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Price chart</label>
+
+        <select>
+            <option>Neon line</option>
+            <option>Area glow</option>
+            <option>Candlestick</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Revenue chart</label>
+
+        <select>
+            <option>Gradient bars</option>
+            <option>Line + markers</option>
+        </select>
+    </div>
+
+</div>
+
+
+<!-- KPI CARDS -->
+
+<div class="cards">
+
+    <div class="card red">
+
+        <div class="label">
+            LATEST CLOSE PRICE
+        </div>
+
+        <div class="value" id="close">
+            $179.57
+        </div>
+
+        <div class="note">
+            As of today
+        </div>
+
+        <div class="bigicon">🚘</div>
+
+    </div>
+
+
+    <div class="card green">
+
+        <div class="label">
+            TOTAL REVENUE (TTM)
+        </div>
+
+        <div class="value">
+            $97.69B
+        </div>
+
+        <div class="note">
+            Trailing Twelve Months
+        </div>
+
+        <div class="bigicon">💰</div>
+
+    </div>
+
+
+    <div class="card purple">
+
+        <div class="label">
+            52 WEEK HIGH
+        </div>
+
+        <div class="value">
+            $488.54
+        </div>
+
+        <div class="note">
+            Highest in selected period
+        </div>
+
+        <div class="bigicon">🚀</div>
+
+    </div>
+
+
+    <div class="card blue">
+
+        <div class="label">
+            52 WEEK LOW
+        </div>
+
+        <div class="value">
+            $167.41
+        </div>
+
+        <div class="note">
+            Lowest in selected period
+        </div>
+
+        <div class="bigicon">🛡️</div>
+
+    </div>
+
+</div>
+
+
+<!-- CHARTS -->
+
+<div class="grid">
+
+    <section class="panel">
+
+        <h3>📈 STOCK PRICE HISTORY</h3>
+
+        <div id="priceChart" class="chart"></div>
+
+    </section>
+
+
+    <section class="panel">
+
+        <h3>💰 QUARTERLY REVENUE</h3>
+
+        <div id="revChart" class="chart"></div>
+
+    </section>
+
+</div>
+
+
+<!-- LOWER PANELS -->
+
+<div class="lower">
+
+    <section class="panel">
+
+        <h3>📊 KEY STATISTICS</h3>
+
+        <div class="stats">
+
+            <div class="stat">
+                <small>Average Close Price</small>
+                <strong class="cyan">$303.36</strong>
+            </div>
+
+            <div class="stat">
+                <small>Price Change (1Y)</small>
+                <strong class="pink">-17.48%</strong>
+            </div>
+
+            <div class="stat">
+                <small>Daily Volatility (Std)</small>
+                <strong class="violet">3.17%</strong>
+            </div>
+
+            <div class="stat">
+                <small>Best Day</small>
+                <strong class="green">16.23% ↑</strong>
+            </div>
+
+            <div class="stat">
+                <small>Worst Day</small>
+                <strong class="pink">-15.43% ↓</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <section class="panel">
+
+        <h3>📈 TRADING SUMMARY</h3>
+
+        <div class="summary">
+
+            <div>
+                <div class="circle violet">▥</div>
+                <small>Avg. Volume</small>
+                <strong>106.55M</strong>
+            </div>
+
+            <div>
+                <div class="circle cyan">$</div>
+                <small>Market Cap</small>
+                <strong>579.38B</strong>
+            </div>
+
+            <div>
+                <div class="circle green">↗</div>
+                <small>P/E Ratio</small>
+                <strong>144.84</strong>
+            </div>
+
+            <div>
+                <div class="circle gold">◷</div>
+                <small>Dividend Yield</small>
+                <strong>0.00%</strong>
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<div class="footer">
+
+    <span>
+        ⓘ　Data provided by Yahoo Finance &
+        IBM Investor Relations. Delayed by 15 minutes.
+    </span>
+
+    <span>
+        Last Updated: Today　🟢
+    </span>
+
+</div>
+
+</main>
+
+</div>
+</div>
+
+
+<script>
+
+/* DATA */
+
+const x = ["2025-12-18", "2025-12-19", "2025-12-20", "2025-12-21", "2025-12-22", "2025-12-23", "2025-12-24", "2025-12-25", "2025-12-26", "2025-12-27", "2025-12-28", "2025-12-29", "2025-12-30", "2025-12-31", "2026-01-01", "2026-01-02", "2026-01-03", "2026-01-04", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-01-10", "2026-01-11", "2026-01-12", "2026-01-13", "2026-01-14", "2026-01-15", "2026-01-16", "2026-01-17", "2026-01-18", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-24", "2026-01-25", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-01-31", "2026-02-01", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-07", "2026-02-08", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-14", "2026-02-15", "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-21", "2026-02-22", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-02-28", "2026-03-01", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-07", "2026-03-08", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-14", "2026-03-15", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-21", "2026-03-22", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-28", "2026-03-29", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-03", "2026-04-04", "2026-04-05", "2026-04-06", "2026-04-07", "2026-04-08", "2026-04-09", "2026-04-10", "2026-04-11", "2026-04-12", "2026-04-13", "2026-04-14", "2026-04-15", "2026-04-16", "2026-04-17", "2026-04-18", "2026-04-19", "2026-04-20", "2026-04-21", "2026-04-22", "2026-04-23", "2026-04-24", "2026-04-25", "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-01", "2026-05-02", "2026-05-03", "2026-05-04", "2026-05-05", "2026-05-06", "2026-05-07", "2026-05-08", "2026-05-09", "2026-05-10", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-23", "2026-05-24", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-05-30", "2026-05-31", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-06", "2026-06-07", "2026-06-08", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-12", "2026-06-13", "2026-06-14", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-27", "2026-06-28", "2026-06-29", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13", "2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-25", "2026-07-26", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31", "2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05", "2026-08-06", "2026-08-07", "2026-08-08", "2026-08-09", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-15", "2026-08-16", "2026-08-17", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22", "2026-08-23", "2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28", "2026-08-29", "2026-08-30", "2026-08-31", "2026-09-01", "2026-09-02", "2026-09-03"];
+const y = [153.51, 150.41, 151.97, 148.14, 148.63, 147.53, 143.57, 143.79, 139.63, 139.17, 135.32, 131.66, 131.11, 134.3, 130.95, 128.53, 129.86, 134.17, 135.04, 134.23, 138.81, 134.74, 138.23, 136.42, 133.26, 129.86, 128.23, 131.32, 128.5, 129.41, 130.85, 129.81, 130.4, 126.49, 122.54, 119.96, 121.79, 121.26, 119.68, 120.63, 120.34, 118.63, 121.52, 123.52, 121.29, 122.13, 122.52, 126.16, 128.44, 126.62, 131.23, 127.83, 127.22, 129.76, 126.67, 126.72, 122.59, 124.3, 126.91, 127.74, 131.38, 129.8, 131.77, 132.79, 133.69, 133.43, 136.74, 141.03, 140.94, 142.61, 138.68, 140.73, 142.27, 147.03, 150.2, 148.37, 147.48, 149.23, 144.96, 144.78, 141.87, 138.48, 134.56, 137.23, 133.95, 131.78, 130.94, 134.57, 130.85, 130.55, 131.18, 134.92, 138.07, 141.63, 139.74, 139.13, 137.99, 141.74, 146.17, 143.1, 140.26, 137.95, 135.64, 135.68, 136.68, 134.65, 130.21, 129.63, 128.59, 129.38, 133.77, 135.72, 136.04, 137.31, 139.12, 135.15, 139.04, 141.82, 145.47, 148.42, 147.59, 146.83, 143.32, 144.74, 140.84, 137.0, 134.46, 131.5, 130.18, 126.2, 121.73, 118.66, 115.13, 114.03, 109.79, 113.45, 114.69, 111.59, 109.46, 108.22, 107.13, 103.8, 107.22, 111.98, 111.84, 111.86, 108.19, 104.66, 103.37, 101.36, 104.59, 101.62, 100, 101.73, 102.17, 100, 100, 100, 100, 100.47, 104.02, 106.02, 103.98, 102.91, 100, 102.7, 103.17, 105.94, 104.53, 102.13, 105.21, 109.89, 113.35, 116.37, 119.5, 121.91, 119.54, 119.88, 118.71, 114.51, 110.29, 108.42, 106.35, 108.32, 112.74, 112.42, 116.66, 121.37, 125.78, 124.7, 122.27, 119.91, 117.26, 114.69, 116.02, 119.91, 123.25, 123.24, 124.84, 127.8, 124.11, 125.78, 129.77, 132.57, 135.07, 135.04, 132.22, 135.09, 133.71, 136.68, 141.24, 140.45, 139.7, 144.03, 146.3, 143.41, 140.11, 137.04, 140.98, 144.01, 140.89, 144.1, 148.75, 150.38, 149.17, 149.79, 146.54, 142.2, 146.75, 148.32, 148.74, 152.95, 152.51, 156.14, 159.35, 156.83, 154.7, 152.95, 150.71, 151.69, 149.63, 149.05, 145.79, 149.78, 148.6, 148.38, 149.33, 153.27, 152.71, 156.77, 156.96, 157.43, 157.82, 153.52, 153.14, 150.37, 145.93, 148.88, 146.01, 145.94];
+const q = ["Q1 2024", "Q2 2024", "Q3 2024", "Q4 2024", "Q1 2025"];
+const r = [24.32, 25.17, 23.35, 25.17, 21.3];
+
+
+/* CHART BASE STYLE */
+
+const layoutBase = {
+
+    paper_bgcolor: 'rgba(0,0,0,0)',
+
+    plot_bgcolor: 'rgba(0,0,0,0)',
+
+    font: {
+        color: '#b4c1d4',
+        family: 'Inter'
+    },
+
+    margin: {
+        l: 45,
+        r: 15,
+        t: 10,
+        b: 35
+    },
+
+    xaxis: {
+        showgrid: false,
+        zeroline: false
+    },
+
+    yaxis: {
+        gridcolor: 'rgba(255,255,255,.08)',
+        zeroline: false
+    },
+
+    hovermode: 'x unified'
+
+};
+
+
+/* STOCK PRICE CHART */
+
+Plotly.newPlot(
+
+    'priceChart',
+
+    [{
+
+        x: x,
+
+        y: y,
+
+        type: 'scatter',
+
+        mode: 'lines',
+
+        line: {
+            color: '#ff3658',
+            width: 2.5
+        },
+
+        fill: 'tozeroy',
+
+        fillcolor: 'rgba(255,45,75,.12)',
+
+        hovertemplate:
+            '%{x}<br>Close: $%{y:.2f}<extra></extra>'
+
+    }],
+
+    {
+
+        ...layoutBase,
+
+        yaxis: {
+            ...layoutBase.yaxis,
+            tickprefix: '$'
+        }
+
+    },
+
+    {
+        displayModeBar: false,
+        responsive: true
+    }
+
+);
+
+
+/* REVENUE CHART */
+
+Plotly.newPlot(
+
+    'revChart',
+
+    [{
+
+        x: q,
+
+        y: r,
+
+        type: 'bar',
+
+        marker: {
+            color: '#ff3153'
+        },
+
+        text: r.map(v => v.toFixed(2) + 'B'),
+
+        textposition: 'outside',
+
+        hovertemplate:
+            '%{x}<br>Revenue: $%{y:.2f}B<extra></extra>'
+
+    }],
+
+    {
+
+        ...layoutBase,
+
+        yaxis: {
+            ...layoutBase.yaxis,
+            ticksuffix: 'B'
+        }
+
+    },
+
+    {
+        displayModeBar: false,
+        responsive: true
+    }
+
+);
+
+
+/* COMPANY BUTTONS */
+
+function choose(name, btn) {
+
+    document.querySelectorAll('.company button')
+        .forEach(b => b.classList.remove('active'));
+
+    btn.classList.add('active');
+
+    document.getElementById('company').value = name;
+
+    changeCompany(name);
+
+}
+
+
+function changeCompany(name) {
+
+    document.querySelectorAll('.company button')
+        .forEach(b => {
+
+            b.classList.toggle(
+                'active',
+                b.innerText.includes(name.toUpperCase())
+            );
+
+        });
+
+    document.getElementById('close').innerText =
+        name === 'Tesla' ? '$179.57' : '$24.18';
+
+}
+
+</script>
+
+</body>
+</html>
